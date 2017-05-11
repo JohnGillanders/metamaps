@@ -362,15 +362,25 @@ const InfoBox = {
     event.stopPropagation()
   },
   deleteActiveMap: function() {
-    var confirmString = 'Are you sure you want to delete this map? '
+    let confirmString = 'Are you sure you want to delete this map? '
     confirmString += 'This action is irreversible. It will not delete the topics and synapses on the map.'
 
-    var doIt = window.confirm(confirmString)
-    var map = Active.Map
-    var mapper = Active.Mapper
-    var authorized = map.authorizePermissionChange(mapper)
+    const doIt = window.confirm(confirmString)
+    const map = Active.Map
+    const authorized = map.authorizePermissionChange(Active.Mapper)
 
-    if (doIt && authorized) {
+    if (!doIt) {
+      return
+    } else if (!authorized) {
+      window.alert("Hey now. We can't just go around willy nilly deleting other people's maps now can we? Run off and find something constructive to do, eh?")
+      return
+    } else if (map.fork_children.length > 0) {
+      let forkMessage = "This map has been forked, so it can't be deleted. The forked map idss are:"
+      forkMessage += map.fork_children.join(", ")
+      window.alert(forkMessage)
+      return
+    } else {
+      // confirmed deletion, authorized, and no fork children
       InfoBox.close()
       DataModel.Maps.Active.remove(map)
       DataModel.Maps.Featured.remove(map)
@@ -379,8 +389,6 @@ const InfoBox = {
       map.destroy()
       browserHistory.push('/')
       GlobalUI.notifyUser('Map eliminated')
-    } else if (!authorized) {
-      window.alert("Hey now. We can't just go around willy nilly deleting other people's maps now can we? Run off and find something constructive to do, eh?")
     }
   }
 }
