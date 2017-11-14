@@ -32,3 +32,5 @@ coverage
 .vagrant
 gentle/
 startserver.sh
+Icon\r
+Icon*
